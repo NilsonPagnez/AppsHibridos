@@ -1,0 +1,46 @@
+{
+  "name": "aplicativo-hibrido-aula1",
+  "version": "1.0.0",
+  "description": "Aula 1: Configuração inicial do aplicativo híbrido de tarefas",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "mongodb",
+    "aplicativo-hibrido",
+    "javascript",
+    "aula1"
+  ],
+  "author": "Professor - Aula Laboratório",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-ejs-layouts": "^2.5.1",
+    "mongodb": "^6.20.0",
+    "mongoose": "^7.8.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/professor/aplicativo-hibrido-tarefas.git"
+  },
+  "bugs": {
+    "url": "https://github.com/professor/aplicativo-hibrido-tarefas/issues"
+  },
+  "homepage": "https://github.com/professor/aplicativo-hibrido-tarefas#readme"
+}

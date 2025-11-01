@@ -1,0 +1,330 @@
+<!-- Página de Gerenciamento de Projetos -->
+<div class="tasks-container">
+    <!-- Cabeçalho -->
+    <div class="tasks-header">
+        <h2>📁 Gerenciador de Projetos</h2>
+        <p>Gerencie seus projetos e as tarefas associadas a cada um.</p>
+    </div>
+
+    <!-- Barra de ferramentas -->
+    <div class="tasks-toolbar">
+        <div class="search-section">
+            <input type="text" id="searchInput" placeholder="🔍 Buscar projetos..." class="search-input">
+        </div>
+        <div class="actions-section">
+            <button id="addProjectBtn" class="btn btn-primary">➕ Novo Projeto</button>
+        </div>
+    </div>
+
+    <!-- Lista de projetos -->
+    <div class="tasks-list-container">
+        <div class="tasks-list" id="projectsList">
+            <!-- Projetos carregados via JavaScript -->
+        </div>
+    </div>
+
+    <!-- Modal para criar/editar projeto -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Novo Projeto</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="projectForm">
+                    <div class="form-group">
+                        <label for="projectName">Nome do Projeto *</label>
+                        <input type="text" id="projectName" name="name" required maxlength="100" placeholder="Digite o nome do projeto...">
+                    </div>
+                    <div class="form-group">
+                        <label for="projectDescription">Descrição</label>
+                        <textarea id="projectDescription" name="description" rows="3" maxlength="1000" placeholder="Descrição opcional do projeto..."></textarea>
+                    </div>
+
+                    <!-- Selecionar tarefas existentes -->
+                    <div class="form-group">
+                        <label for="projectTasks">Tarefas Associadas</label>
+                        <select id="projectTasks" name="tasks" multiple class="task-select">
+                            <!-- Preenchido dinamicamente com as tarefas existentes -->
+                        </select>
+                        <small>Segure CTRL (ou CMD) para selecionar várias tarefas</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelBtn">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="saveBtn">Salvar Projeto</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+// Dados
+let projects = [];
+let tasks = [];
+let editingProjectId = null;
+
+// Elementos DOM
+const projectsList = document.getElementById('projectsList');
+const projectModal = document.getElementById('projectModal');
+const modalTitle = document.getElementById('modalTitle');
+const projectForm = document.getElementById('projectForm');
+const saveBtn = document.getElementById('saveBtn');
+const cancelBtn = document.getElementById('cancelBtn');
+const closeBtn = document.querySelector('.close');
+const addProjectBtn = document.getElementById('addProjectBtn');
+const searchInput = document.getElementById('searchInput');
+const projectTasksSelect = document.getElementById('projectTasks');
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    loadProjects();
+    loadTasks();
+    setupEventListeners();
+});
+
+function setupEventListeners() {
+    addProjectBtn.addEventListener('click', openAddModal);
+    saveBtn.addEventListener('click', saveProject);
+    cancelBtn.addEventListener('click', closeModal);
+    closeBtn.addEventListener('click', closeModal);
+    searchInput.addEventListener('input', filterProjects);
+    window.addEventListener('click', e => { if (e.target === projectModal) closeModal(); });
+}
+
+// 📦 Carregar projetos da API
+async function loadProjects() {
+    try {
+        const response = await fetch('/api/projetos');
+        const result = await response.json();
+
+        if (result.success) {
+            projects = result.data;
+            renderProjects();
+        } else {
+            showError('Erro ao carregar projetos.');
+        }
+    } catch (err) {
+        showError('Erro de conexão ao carregar projetos.');
+        console.error(err);
+    }
+}
+
+// 📋 Carregar tarefas para vincular
+async function loadTasks() {
+    try {
+        const response = await fetch('/api/tarefas');
+        const result = await response.json();
+
+        if (result.success) {
+            tasks = result.data;
+            renderTaskOptions();
+        } else {
+            console.warn('Não foi possível carregar tarefas.');
+        }
+    } catch (err) {
+        console.error('Erro ao carregar tarefas:', err);
+    }
+}
+
+function renderTaskOptions() {
+    projectTasksSelect.innerHTML = '';
+    tasks.forEach(task => {
+        const opt = document.createElement('option');
+        opt.value = task._id;
+        opt.textContent = `${task.title} (${task.priority})`;
+        projectTasksSelect.appendChild(opt);
+    });
+}
+
+// 🧱 Renderizar lista de projetos
+function renderProjects() {
+    projectsList.innerHTML = '';
+
+    if (projects.length === 0) {
+        projectsList.innerHTML = `
+            <div style="text-align:center; padding:40px; color:#6c757d;">
+                <div style="font-size:3rem;">📁</div>
+                <p>Nenhum projeto encontrado.</p>
+            </div>`;
+        return;
+    }
+
+    projects.forEach(project => {
+        const div = document.createElement('div');
+        div.className = 'project-item';
+        div.innerHTML = `
+            <div class="project-header">
+                <h3>${project.name}</h3>
+                <div class="project-actions">
+                    <button class="action-btn edit-btn" onclick="editProject('${project._id}')">✏️ Editar</button>
+                    <button class="action-btn delete-btn" onclick="deleteProject('${project._id}')">🗑️ Excluir</button>
+                </div>
+            </div>
+            <p>${project.description || ''}</p>
+            <div class="project-meta">
+                <span>🕒 Criado em: ${formatDate(project.createdAt)}</span>
+                <span>📋 ${project.tasks?.length || 0} tarefas vinculadas</span>
+            </div>
+            ${renderTaskList(project.tasks)}
+        `;
+        projectsList.appendChild(div);
+    });
+}
+
+function renderTaskList(taskList) {
+    if (!taskList || taskList.length === 0) return '';
+    return `
+        <ul class="task-list">
+            ${taskList.map(t => `<li>✅ ${t.title}</li>`).join('')}
+        </ul>
+    `;
+}
+
+// 🔍 Filtrar projetos por nome
+function filterProjects() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const filtered = projects.filter(p => 
+        p.name.toLowerCase().includes(searchTerm) ||
+        (p.description && p.description.toLowerCase().includes(searchTerm))
+    );
+
+    projectsList.innerHTML = '';
+    filtered.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'project-item';
+        div.innerHTML = `
+            <div class="project-header">
+                <h3>${p.name}</h3>
+                <p>${p.description || ''}</p>
+            </div>
+        `;
+        projectsList.appendChild(div);
+    });
+}
+
+// ➕ Abrir modal para adicionar
+function openAddModal() {
+    editingProjectId = null;
+    modalTitle.textContent = 'Novo Projeto';
+    projectForm.reset();
+    projectTasksSelect.value = [];
+    projectModal.style.display = 'block';
+}
+
+// ✏️ Editar projeto existente
+function editProject(id) {
+    const project = projects.find(p => p._id === id);
+    if (!project) return;
+
+    editingProjectId = id;
+    modalTitle.textContent = 'Editar Projeto';
+
+    document.getElementById('projectName').value = project.name;
+    document.getElementById('projectDescription').value = project.description || '';
+
+    if (project.tasks && project.tasks.length > 0) {
+        projectTasksSelect.value = project.tasks.map(t => t._id || t);
+    }
+
+    projectModal.style.display = 'block';
+}
+
+// 💾 Salvar projeto (criar/editar)
+async function saveProject() {
+    const formData = new FormData(projectForm);
+    const name = formData.get('name').trim();
+
+    if (!name) {
+        alert('O nome do projeto é obrigatório!');
+        return;
+    }
+
+    const projectData = {
+        name: name,
+        description: formData.get('description').trim(),
+        tasks: Array.from(projectTasksSelect.selectedOptions).map(opt => opt.value)
+    };
+
+    try {
+        let response;
+        if (editingProjectId) {
+            response = await fetch(`/api/projetos/${editingProjectId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(projectData)
+            });
+        } else {
+            response = await fetch('/api/projetos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(projectData)
+            });
+        }
+
+        const result = await response.json();
+        if (result.success) {
+            closeModal();
+            await loadProjects();
+        } else {
+            alert('Erro ao salvar projeto: ' + result.error);
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Erro ao salvar projeto.');
+    }
+}
+
+// 🗑️ Excluir projeto
+async function deleteProject(id) {
+    if (!confirm('Tem certeza que deseja excluir este projeto?')) return;
+    try {
+        const response = await fetch(`/api/projetos/${id}`, { method: 'DELETE' });
+        const result = await response.json();
+
+        if (result.success) {
+            await loadProjects();
+        } else {
+            alert('Erro ao excluir projeto: ' + result.error);
+        }
+    } catch (err) {
+        console.error('Erro ao excluir projeto:', err);
+        alert('Erro de conexão.');
+    }
+}
+
+// ❌ Fechar modal
+function closeModal() {
+    projectModal.style.display = 'none';
+    projectForm.reset();
+    editingProjectId = null;
+}
+
+// 📅 Formatar data
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+}
+
+// ⚠️ Mostrar erro
+function showError(msg) {
+    projectsList.innerHTML = `
+        <div style="text-align:center; padding:40px; color:#dc3545;">
+            <div style="font-size:3rem;">⚠️</div>
+            <p>${msg}</p>
+        </div>`;
+}
+</script>
+
+<style>
+/* (Opcional) Um pouco de estilo básico para os projetos */
+.projects-container { padding: 20px; max-width: 900px; margin: auto; }
+.project-item { background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+.project-header { display: flex; justify-content: space-between; align-items: center; }
+.project-actions button { margin-left: 5px; }
+.task-list { margin-top: 10px; padding-left: 20px; }
+.task-list li { color: #555; font-size: 0.9rem; }
+</style>

@@ -1,0 +1,33 @@
+<div class="card">
+    <h2>
+        <%= title %>
+    </h2>
+    <p>
+        <%= description %>
+    </p>
+</div>
+
+<div class="card">
+    <h3>Dados Personalizados</h3>
+    <p>
+        <%= customData %>
+    </p>
+    <h4>Lista de Itens:</h4>
+    <ul>
+        <% items.forEach(function(item) { %>
+            <li>
+                <%= item %>
+            </li>
+            <% }); %>
+    </ul>
+</div>
+
+<div class="card">
+    <h3>Teste de Funcionalidades</h3>
+    <button onclick="testarFuncao()" class="btn">Testar Função</button>
+</div>
+<script>
+    function testarFuncao() {
+        alert('Função testada com sucesso!');
+    }
+</script>

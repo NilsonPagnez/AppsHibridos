@@ -1,0 +1,536 @@
+<!-- Dashboard de Tarefas -->
+<div class="dashboard-container">
+    <!-- Título da página -->
+    <div class="dashboard-header">
+        <h2>📊 Dashboard de Tarefas</h2>
+        <p>Visão geral das suas tarefas e estatísticas</p>
+    </div>
+
+    <!-- Grid de Estatísticas -->
+    <div class="stats-grid">
+        <!-- Card Total de Tarefas -->
+        <div class="stat-card total-tasks">
+            <div class="stat-icon">📋</div>
+            <div class="stat-content">
+                <h3><%= estatisticas.totalTarefas %></h3>
+                <p>Total de Tarefas</p>
+            </div>
+        </div>
+
+        <!-- Card Tarefas Concluídas -->
+        <div class="stat-card completed-tasks">
+            <div class="stat-icon">✅</div>
+            <div class="stat-content">
+                <h3><%= estatisticas.tarefasConcluidas %></h3>
+                <p>Tarefas Concluídas</p>
+            </div>
+        </div>
+
+        <!-- Card Tarefas Pendentes -->
+        <div class="stat-card pending-tasks">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-content">
+                <h3><%= estatisticas.tarefasPendentes %></h3>
+                <p>Tarefas Pendentes</p>
+            </div>
+        </div>
+
+        <!-- Card Percentual de Conclusão -->
+        <div class="stat-card completion-rate">
+            <div class="stat-icon">📈</div>
+            <div class="stat-content">
+                <h3><%= estatisticas.percentualConclusao %>%</h3>
+                <p>Taxa de Conclusão</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de Conteúdo Principal -->
+    <div class="dashboard-content">
+        <!-- Lista das Últimas Tarefas -->
+        <div class="recent-tasks-section">
+            <h3>🕒 Últimas Tarefas Adicionadas</h3>
+            <div class="tasks-list">
+                <% ultimasTarefas.forEach(function(tarefa) { %>
+                <div class="task-item <%= tarefa.concluida ? 'completed' : 'pending' %>">
+                    <div class="task-status">
+                        <% if (tarefa.concluida) { %>
+                            <span class="status-icon completed">✓</span>
+                        <% } else { %>
+                            <span class="status-icon pending">○</span>
+                        <% } %>
+                    </div>
+                    <div class="task-info">
+                        <h4><%= tarefa.titulo %></h4>
+                        <p class="task-date">Adicionada em: <%= new Date(tarefa.data).toLocaleDateString('pt-BR') %></p>
+                    </div>
+                    <div class="task-badge">
+                        <span class="badge <%= tarefa.concluida ? 'badge-success' : 'badge-warning' %>">
+                            <%= tarefa.concluida ? 'Concluída' : 'Pendente' %>
+                        </span>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+        </div>
+
+        <!-- Gráfico de Progresso -->
+        <div class="chart-section">
+            <h3>📊 Progresso das Tarefas</h3>
+            <div class="chart-container">
+                <!-- Gráfico de Pizza Simples -->
+                <div class="pie-chart">
+                    <div class="pie-chart-inner">
+                        <div class="pie-slice completed" style="--percentage: <%= estatisticas.percentualConclusao %>%"></div>
+                        <div class="pie-center">
+                            <span class="pie-percentage"><%= estatisticas.percentualConclusao %>%</span>
+                            <span class="pie-label">Concluído</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gráfico de Barras -->
+                <div class="bar-chart">
+                    <div class="bar-chart-item">
+                        <div class="bar-label">Concluídas</div>
+                        <div class="bar-container">
+                            <div class="bar-fill completed" style="width: <%= estatisticas.percentualConclusao %>%"></div>
+                        </div>
+                        <div class="bar-value"><%= estatisticas.tarefasConcluidas %></div>
+                    </div>
+                    <div class="bar-chart-item">
+                        <div class="bar-label">Pendentes</div>
+                        <div class="bar-container">
+                            <div class="bar-fill pending" style="width: <%= 100 - estatisticas.percentualConclusao %>%"></div>
+                        </div>
+                        <div class="bar-value"><%= estatisticas.tarefasPendentes %></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumo Executivo -->
+    <div class="executive-summary">
+        <h3>📋 Resumo Executivo</h3>
+        <div class="summary-content">
+            <p>
+                Você possui <strong><%= estatisticas.totalTarefas %></strong> tarefas no total, 
+                sendo <strong><%= estatisticas.tarefasConcluidas %></strong> concluídas e 
+                <strong><%= estatisticas.tarefasPendentes %></strong> pendentes.
+            </p>
+            <p>
+                Sua taxa de conclusão atual é de <strong><%= estatisticas.percentualConclusao %>%</strong>.
+                <% if (estatisticas.percentualConclusao >= 80) { %>
+                    🎉 Excelente trabalho! Você está muito produtivo!
+                <% } else if (estatisticas.percentualConclusao >= 60) { %>
+                    👍 Bom progresso! Continue assim!
+                <% } else if (estatisticas.percentualConclusao >= 40) { %>
+                    💪 Você está no caminho certo! Não desista!
+                <% } else { %>
+                    🚀 Que tal focar em concluir algumas tarefas pendentes?
+                <% } %>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos CSS específicos para o Dashboard -->
+<style>
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.dashboard-header h2 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 2.5rem;
+}
+
+.dashboard-header p {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+}
+
+/* Grid de Estatísticas */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+    font-size: 3rem;
+    margin-right: 20px;
+}
+
+.stat-content h3 {
+    font-size: 2.5rem;
+    margin: 0;
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+.stat-content p {
+    margin: 5px 0 0 0;
+    color: #7f8c8d;
+    font-size: 1rem;
+}
+
+/* Cores específicas para cada card */
+.total-tasks { border-left: 5px solid #3498db; }
+.completed-tasks { border-left: 5px solid #27ae60; }
+.pending-tasks { border-left: 5px solid #f39c12; }
+.completion-rate { border-left: 5px solid #9b59b6; }
+
+/* Conteúdo Principal */
+.dashboard-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+/* Lista de Tarefas Recentes */
+.recent-tasks-section {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.recent-tasks-section h3 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+.tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: rgba(248, 249, 250, 0.8);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.task-item:hover {
+    background: rgba(52, 152, 219, 0.1);
+    transform: translateX(5px);
+}
+
+.task-item.completed {
+    opacity: 0.8;
+}
+
+.task-status {
+    margin-right: 15px;
+}
+
+.status-icon {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.status-icon.completed {
+    background: #27ae60;
+    color: white;
+}
+
+.status-icon.pending {
+    background: #f39c12;
+    color: white;
+}
+
+.task-info {
+    flex: 1;
+}
+
+.task-info h4 {
+    margin: 0 0 5px 0;
+    color: #2c3e50;
+    font-size: 1rem;
+}
+
+.task-date {
+    margin: 0;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+.task-badge {
+    margin-left: 10px;
+}
+
+.badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.badge-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge-warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+/* Seção de Gráficos */
+.chart-section {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.chart-section h3 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+.chart-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Gráfico de Pizza */
+.pie-chart {
+    display: flex;
+    justify-content: center;
+}
+
+.pie-chart-inner {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: conic-gradient(
+        #27ae60 0deg <%= estatisticas.percentualConclusao * 3.6 %>deg,
+        #e74c3c <%= estatisticas.percentualConclusao * 3.6 %>deg 360deg
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pie-center {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.pie-percentage {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.pie-label {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+}
+
+/* Gráfico de Barras */
+.bar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.bar-chart-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.bar-label {
+    width: 80px;
+    font-size: 0.9rem;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.bar-container {
+    flex: 1;
+    height: 25px;
+    background: rgba(236, 240, 241, 0.8);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 12px;
+    transition: width 1s ease;
+}
+
+.bar-fill.completed {
+    background: linear-gradient(90deg, #27ae60, #2ecc71);
+}
+
+.bar-fill.pending {
+    background: linear-gradient(90deg, #e74c3c, #f39c12);
+}
+
+.bar-value {
+    width: 30px;
+    text-align: center;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* Resumo Executivo */
+.executive-summary {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.executive-summary h3 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+.summary-content p {
+    color: #2c3e50;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .dashboard-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .stat-icon {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    .pie-chart-inner {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .pie-center {
+        width: 90px;
+        height: 90px;
+    }
+    
+    .pie-percentage {
+        font-size: 1.5rem;
+    }
+    
+    .bar-chart-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .bar-label {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+    
+    .bar-container {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-container {
+        padding: 10px;
+    }
+    
+    .dashboard-header h2 {
+        font-size: 2rem;
+    }
+    
+    .stat-content h3 {
+        font-size: 2rem;
+    }
+    
+    .task-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .task-status {
+        margin-right: 0;
+    }
+    
+    .task-badge {
+        margin-left: 0;
+    }
+}
+</style>

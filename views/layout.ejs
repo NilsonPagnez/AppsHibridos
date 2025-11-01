@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %> - Aplicativo Híbrido
+    </title>
+    <link rel="stylesheet" href="/css/styles.css">
+
+
+</head>
+
+<body>
+    <div class="container">
+        <!-- Cabeçalho -->
+        <div class="header">
+            <h1>Aplicativo Híbrido</h1>
+            <p>
+                <%= description %>
+            </p>
+        </div>
+        <!-- Menu de Navegação -->
+        <nav class="nav">
+            <!-- Botão do menu hambúrguer para mobile -->
+            <button class="nav-toggle" id="navToggle" aria-label="Abrir menu de navegação">
+                <span class="hamburger"></span>
+                <span class="hamburger"></span>
+                <span class="hamburger"></span>
+            </button>
+            
+            <!-- Lista de navegação -->
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">Início</a></li>
+                <li><a href="/dashboard" class="<%= currentPath === '/dashboard' ? 'active' : '' %>">Dashboard</a></li>
+                <li><a href="/sobre" class="<%= currentPath === '/sobre' ? 'active' : '' %>">Sobre</a></li>
+                <li><a href="/projetos" class="<%= currentPath === '/projetos' ? 'active' : '' %>">Projetos</a></li>
+                <li><a href="/tarefas" class="<%= currentPath === '/tarefas' ? 'active' : '' %>">Tarefas</a></li>
+                <li><a href="/contato" class="<%= currentPath === '/contato' ? 'active' : '' %>">Contato</a></li>
+                <li><a href="/produtos" class="<%= currentPath === '/produtos' ? 'active' : '' %>">Produtos</a></li>
+                <li><a href="/nova-pagina" class="<%= currentPath === '/nova-pagina' ? 'active' : '' %>">Nova Página</a></li>
+                <li><a href="/api/status" class="<%= currentPath === '/api/status' ? 'active' : '' %>">API Status</a></li>
+            </ul>
+        </nav>
+        
+        <!-- Overlay para mobile -->
+        <div class="nav-overlay" id="navOverlay"></div>
+        <!-- Conteúdo Principal -->
+        <main class="content">
+            <%- body %>
+        </main>
+        <!-- Rodapé -->
+        <div class="footer">
+            <p> Aplicativo Híbrido - Aula 1 | Desenvolvido para fins educacionais</p>
+        </div>
+    </div>
+
+    <!-- JavaScript para menu responsivo -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navToggle = document.getElementById('navToggle');
+            const navMenu = document.getElementById('navMenu');
+            const navOverlay = document.getElementById('navOverlay');
+            
+            // Função para abrir/fechar menu
+            function toggleMenu() {
+                navMenu.classList.toggle('nav-menu-open');
+                navToggle.classList.toggle('nav-toggle-open');
+                navOverlay.classList.toggle('nav-overlay-open');
+                
+                // Animar o botão hambúrguer
+                const hamburgers = navToggle.querySelectorAll('.hamburger');
+                hamburgers.forEach((hamburger, index) => {
+                    hamburger.classList.toggle(`hamburger-${index + 1}-open`);
+                });
+            }
+            
+            // Função para fechar menu
+            function closeMenu() {
+                navMenu.classList.remove('nav-menu-open');
+                navToggle.classList.remove('nav-toggle-open');
+                navOverlay.classList.remove('nav-overlay-open');
+                
+                // Resetar animação do hambúrguer
+                const hamburgers = navToggle.querySelectorAll('.hamburger');
+                hamburgers.forEach((hamburger, index) => {
+                    hamburger.classList.remove(`hamburger-${index + 1}-open`);
+                });
+            }
+            
+            // Toggle do menu mobile
+            navToggle.addEventListener('click', toggleMenu);
+            
+            // Fechar menu ao clicar no overlay
+            navOverlay.addEventListener('click', closeMenu);
+            
+            // Fechar menu ao clicar em um link
+            const navLinks = navMenu.querySelectorAll('a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', closeMenu);
+            });
+            
+            // Fechar menu ao redimensionar a tela
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    closeMenu();
+                }
+            });
+            
+            // Fechar menu com tecla ESC
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && navMenu.classList.contains('nav-menu-open')) {
+                    closeMenu();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
